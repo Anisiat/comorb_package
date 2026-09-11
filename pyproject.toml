@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comorb-icare"
+version = "0.1.0"
+description = "Utilities for deriving the 17 CCI comorbidities and index from icare tables (diagnoses, problems, prescribing)"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "pandas>=2.3",
+    "numpy>=1.23",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+comorb_icare = ["data/*.csv"]
