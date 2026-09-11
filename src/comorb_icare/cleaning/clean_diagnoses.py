@@ -110,6 +110,7 @@ def clean_diagnoses(
     # Use spell admission dates as an optional fallback.
     if spell_admission_dates_df is not None:
         spell_dates = spell_admission_dates_df.copy()
+
         spell_dates.columns = spell_dates.columns.astype("string").str.strip().str.lower()
 
         if spell_dates.columns.duplicated().any():
@@ -149,6 +150,16 @@ def clean_diagnoses(
             spell_dates["admission_date"],
             errors="coerce",
         )
+
+        # Remove any duplicate records for the same spell IDs.
+
+        spell_dates = spell_dates.drop_duplicates()
+
+        if spell_dates["spell_id"].duplicated().any():
+            raise ValueError(
+                "spell_admission_dates_df contains multiple records "
+                "for the same spell_id."
+            )
 
         # Attach admission dates by spell.
         df = df.merge(

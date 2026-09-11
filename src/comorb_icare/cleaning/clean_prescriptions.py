@@ -7,7 +7,6 @@ REQUIRED_COLUMNS = frozenset(
     {
         "subject",
         "medication_name_short",
-        "therapeutical_class",
         "order_dt_tm",
     }
 )
@@ -52,15 +51,6 @@ def clean_prescriptions(prescriptions_df: pd.DataFrame) -> pd.DataFrame:
         df["order_dt_tm"],
         errors="coerce",
     )
-
-    # Report undated records without discarding them.
-    n_missing_order_dates = df["order_dt_tm"].isna().sum()
-
-    if n_missing_order_dates:
-        print(
-            f"{n_missing_order_dates} prescription records "
-            "have missing order_dt_tm"
-        )
 
     # Keep records with a medication name or class.
     df = df.dropna(
