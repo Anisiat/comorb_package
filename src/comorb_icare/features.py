@@ -56,7 +56,7 @@ def build_comorbidity_features(
     evidence_tables: list[pd.DataFrame],
     cutoff_col: str,
     spell_col: str = "spell_id",
-    CCI_score = False, 
+    cci_score: bool = False, 
 ) -> pd.DataFrame:
     """Build spell-level binary comorbidity features from mapped evidence.
 
@@ -76,7 +76,7 @@ def build_comorbidity_features(
         for example ``admission_date``.
     spell_col : str, default="spell_id"
         Column identifying each spell.
-    CCI_score :  bool, default = 'False'
+    cci_score :  bool, default = 'False'
         Include CCI score in output table.
 
     Returns
@@ -216,7 +216,7 @@ def build_comorbidity_features(
         .astype("int8")
     )
 
-    if CCI_score:
+    if cci_score:
         features = _calculate_cci_score(features)
 
     return features

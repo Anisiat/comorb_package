@@ -43,8 +43,8 @@ def clean_prescriptions(prescriptions_df: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Prescription records contain missing subject identifiers.")
 
     # Lowercase medication text for consistent matching.
-    for column in ("medication_name_short", "therapeutical_class"):
-        df[column] = _clean_optional_string(df[column], lowercase=True)
+
+    df['medication_name_short'] = _clean_optional_string(df['medication_name_short'], lowercase=True)
 
     # Coerce invalid dates to NaT.
     df["order_dt_tm"] = pd.to_datetime(
@@ -54,8 +54,7 @@ def clean_prescriptions(prescriptions_df: pd.DataFrame) -> pd.DataFrame:
 
     # Keep records with a medication name or class.
     df = df.dropna(
-        subset=["medication_name_short", "therapeutical_class"],
-        how="all",
+        subset=["medication_name_short"]
     )
 
     # Remove duplicate records and reset the index.

@@ -17,6 +17,13 @@ def clean_diagnoses(
 ) -> pd.DataFrame:
     """Clean an iCARE diagnoses table for downstream comorbidity mapping.
 
+    This function performs the following operations:
+    1. Normalises column names.
+    2. Validates the input schema.
+    3. Cleans available codes, descriptions and spell identifiers.
+    4. Coerces invalid or absent diagnosis dates to NaT.
+    5. Uses spell admission dates as an optional fallback.
+
     Parameters
     ----------
     diagnoses_df : pd.DataFrame
@@ -33,8 +40,8 @@ def clean_diagnoses(
         Cleaned diagnoses table containing the original diagnosis fields,
         plus:
 
-    - ``evidence_date``: best available date for the diagnosis evidence.
-    - ``evidence_date_source``: source used to derive ``evidence_date``.
+    - ``comorbidity_date``: best available date for the diagnosis evidence.
+    - ``comorbidity_date_source``: source used to derive ``comorbidity_date``.
 
     If ``spell_admission_dates_df`` is provided, ``admission_date`` is
     also included and is used as a fallback when ``diagnosis_date`` is
@@ -47,7 +54,7 @@ def clean_diagnoses(
 
     Invalid dates are converted to ``NaT``.
 
-    If spell admission dates are supplied, ``evidence_date`` is populated
+    If spell admission dates are supplied, ``comorbidity_date`` is populated
     using ``diagnosis_date`` where available and ``admission_date`` as a
     fallback.
     """
@@ -169,38 +176,38 @@ def clean_diagnoses(
         )
 
         # Prefer diagnosis dates and record the chosen source.
-        df["evidence_date"] = df["diagnosis_date"].fillna(
+        df["comorbidity_date"] = df["diagnosis_date"].fillna(
             df["admission_date"]
         )
 
-        df["evidence_date_source"] = "diagnosis_date"
+        df["comorbidity_date_source"] = "diagnosis_date"
         df.loc[
             df["diagnosis_date"].isna()
             & df["admission_date"].notna(),
-            "evidence_date_source",
+            "comorbidity_date_source",
         ] = "spell_admission_date"
 
         df.loc[
-            df["evidence_date"].isna(),
-            "evidence_date_source",
+            df["comorbidity_date"].isna(),
+            "comorbidity_date_source",
         ] = pd.NA
 
     else:
-        df["evidence_date"] = df["diagnosis_date"]
+        df["comorbidity_date"] = df["diagnosis_date"]
 
-        df["evidence_date_source"] = (
+        df["comorbidity_date_source"] = (
             df["diagnosis_date"]
             .notna()
             .map({True: "diagnosis_date", False: pd.NA})
         )
 
     # Keep records with at least one diagnosis code.
-    evidence_columns = [
+    comorbidity_columns = [
         column
         for column in ("diagnosis_code_icd", "diagnosis_code_snomed")
         if column in df.columns
     ]
-    df = df.dropna(subset=evidence_columns, how="all")
+    df = df.dropna(subset=comorbidity_columns, how="all")
 
     # Remove duplicate records and reset the index.
     return df.drop_duplicates().reset_index(drop=True)

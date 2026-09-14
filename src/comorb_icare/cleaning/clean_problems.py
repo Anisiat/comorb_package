@@ -52,12 +52,12 @@ def clean_problems(problems_df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Keep records with a code or description.
-    evidence_columns = [
+    comorbidity_columns = [
         column
         for column in ("problem_code", "problem_desc")
         if column in df.columns
     ]
-    df = df.dropna(subset=evidence_columns, how="all")
+    df = df.dropna(subset=comorbidity_columns, how="all")
 
     # Remove duplicate records and reset the index.
     return df.drop_duplicates().reset_index(drop=True)
