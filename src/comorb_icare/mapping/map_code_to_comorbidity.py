@@ -3,6 +3,21 @@ import pandas as pd
 from ._loaders import load_mapping
 
 
+
+def _get_icd_prefixes(mapping_df):
+    """Prepare ICD prefixes and their target comorbidity.
+    
+    Returns a list of tuples (icd_prefix, comorbidity) for subsequent prefix matching."""
+
+    return [
+        (str(code).strip().upper().replace(".", ""), comorbidity)
+        for code, comorbidity in mapping_df[
+            ["icd_code", "comorbidity"]
+        ].itertuples(index=False, name=None)
+
+        if pd.notna(code) and pd.notna(comorbidity)
+    ]
+
 def _match_icd_code(value, icd_prefixes):
     """Match one ICD-10 code."""
 
@@ -63,6 +78,7 @@ def map_codes_to_comorbidities(
     df: pd.DataFrame,
     code_col: str,
     code_type: str,
+    date_col: str,
     source: str | None = None,
     mapping_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
@@ -76,22 +92,25 @@ def map_codes_to_comorbidities(
     Parameters
     ----------
     df : pd.DataFrame
-        DataFrame containing the codes to map.
+        DataFrame containing ``subject`` and the codes to map.
     code_col : str
         Name of the column in df containing the codes to map.
     code_type : str
         Type of code to map. Must be one of 'icd', 'snomed', or 'medication'.
-    source : str
-        Optional label written to the ``source`` column.
+    date_col : str
+        Name of the column in df containing the comorbidity dates.
+    source : str, optional
+        Optional label for source table of comorbidity evidence e.g. diagnoses, problems, prescribing.
     mapping_df : pd.DataFrame, optional
         DataFrame containing the mapping of codes to comorbidities. If not provided, the default mapping for the specified code type will be loaded.
     
     Returns
     -------
     pd.DataFrame
-        DataFrame with a nullable string ``comorbidity`` column. Unmatched
-        codes retain one row with a missing value. Multiple matches produce
-        one row per distinct comorbidity, repeating the original fields and index.
+        DataFrame containing ``subject``, ``comorbidity_code_value``,
+        ``comorbidity_code_source``, ``comorbidity``, and ``comorbidity_date``.
+        Multiple comorbidity matches are expanded into separate rows.
+        Unmatched codes retain a row with a missing comorbidity.
     """
 
     df = df.copy()
@@ -104,34 +123,53 @@ def map_codes_to_comorbidities(
             f"df does not contain code column '{code_col}'."
         )
     
+    if "subject" not in df.columns:
+        raise ValueError("df must contain 'subject'.")
+
+    if date_col not in df.columns:
+        raise ValueError(
+            f"df does not contain date column '{date_col}'."
+        )
+
+    # Preserve the mapped code and choose the source-specific evidence date.
+    df["comorbidity_code_value"] = df[code_col].astype("string")
+
+    if source:
+        df["comorbidity_code_source"] = source
+    else:
+        df["comorbidity_code_source"] = code_type
+
+    # Rename and standardize the date column.
+    df["comorbidity_date"] = pd.to_datetime(
+        df[date_col],
+        errors="coerce",
+    )
+
     # Load the default mapping if no mapping DataFrame is provided
     if mapping_df is None:
         mapping_df = load_mapping(code_type)
-    else:
-        # Validate the provided mapping DataFrame
-        required_columns = {"comorbidity"}
-        if code_type == "icd":
-            required_columns.add("icd_code")
-        elif code_type == "snomed":
-            required_columns.add("snomed_code")
-        elif code_type == "medication":
-            required_columns.add("medication_name")
+    
+    # Validate the provided mapping DataFrame
+    required_columns = {"comorbidity"}
 
-        missing_columns = required_columns - set(mapping_df.columns)
-        if missing_columns:
-            raise ValueError(f"Provided mapping DataFrame is missing required columns: {missing_columns}")
+    if code_type == "icd":
+        required_columns.add("icd_code")
+    elif code_type == "snomed":
+        required_columns.add("snomed_code")
+    else:
+        required_columns.add("medication_name")
+
+    missing_columns = required_columns - set(mapping_df.columns)
+
+    if missing_columns:
+        raise ValueError(
+            f"Provided mapping DataFrame is missing required columns: {missing_columns}"
+        )
 
 
     # Prepare ICD prefixes and their target conditions.
     if code_type == "icd":
-        icd_prefixes = [
-            (str(code).strip().upper().replace(".", ""), comorbidity)
-            for code, comorbidity in mapping_df[
-                ["icd_code", "comorbidity"]
-            ].itertuples(index=False, name=None)
-
-            if pd.notna(code) and pd.notna(comorbidity)
-        ]
+        icd_prefixes = _get_icd_prefixes(mapping_df)
 
         df["comorbidity"] = df[code_col].map(
             lambda value: _match_icd_code(value, icd_prefixes)
@@ -153,7 +191,13 @@ def map_codes_to_comorbidities(
     df = df.explode("comorbidity")
     df["comorbidity"] = df["comorbidity"].astype("string")
 
-    if source is not None:
-        df['source'] = source
+    output_columns = [
+        "subject",
+        "comorbidity_code_value",
+        "comorbidity_code_source",
+        "comorbidity",
+        "comorbidity_date",
+    ]
 
-    return df
+    return df[output_columns].reset_index(drop=True)
+
