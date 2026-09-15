@@ -205,7 +205,6 @@ They should not be interpreted as fixed characteristics of the full iCARE datase
 |---|---:|
 | `subject` | 0.0 |
 | `medication_name_short` | 0.0 |
-| `therapeutical_class` | 14.3 |
 | `order_dt_tm` | 0.0 |
 
 ### Problems
@@ -232,6 +231,22 @@ The package will support calculation of the standard weighted Charlson Comorbidi
 
 Age-adjusted CCI scoring may be supported separately where users provide an appropriate age variable, as age is not contained within the three core iCARE source tables.
 
+# Module information 
+
+## Cleaning 
+
+takes in raw tables cleans and standardises them 
+
+diagnoses have a lot of missing dates which can be inputed by matching on spell ids and using admission dates as proxy 
+
+keeps track of evidence data and source 
+
+## Mapping
+
+Maps ICD 10 and SNOMED codes from lookups + uses medication to innfer some comorbidities 
+importantly - always returns same schema for all tables so they can later be merged into a long table with all the comorbidity information 
+for each patient - keeping track of what the source of info was (also keeps track of snomed or icd code?) + evidence date 
+
 ## Development roadmap
 
 Planned functionality includes:
@@ -244,3 +259,38 @@ Planned functionality includes:
 - a high-level function that performs the full pipeline automatically
 - support for using one, two, or all three iCARE source tables
 - retention of evidence provenance for validation and auditability
+- double check ICD behaviour - 
+
+This:
+
+return list(dict.fromkeys(
+    comorbidity
+    for prefix, comorbidity in icd_prefixes
+    if observed_code.startswith(prefix)
+))
+
+means all matching prefixes are retained.
+
+For example, suppose your mapping contains:
+
+[
+    ("I10", "condition_A"),
+    ("I109", "condition_B"),
+]
+
+and the observed code is:
+
+"I109"
+
+Both match:
+
+"I109".startswith("I10")   # True
+"I109".startswith("I109")  # True
+
+so you'd get:
+
+["condition_A", "condition_B"]
+
+That may be exactly what you want, depending on your mapping. Just make sure it is intentional.
+
+For CCI-style mappings, overlapping prefixes can matter, so I'd check your mapping table for this before deciding whether "all matches" or "most specific match" is the desired behaviour.
