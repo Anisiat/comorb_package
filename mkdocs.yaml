@@ -1,0 +1,57 @@
+site_name: comorb-icare Documentation
+site_description: Documentation and guides for deriving comorbidity features from iCARE data
+site_url: https://Anisiat.github.io/comorb_package/
+
+dev_addr: '0.0.0.0:8000'
+
+theme:
+  name: material
+
+  font:
+    text: Inter
+    code: Fira Code
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+nav:
+  - Home: index.md
+  - Getting Started: 00-getting-started.md
+  - CCI Mapping Methodology: 01-CCI-mapping-methodology.md
+  - iCARE Source Tables: 02-icare-source-tables-extraction.md
+  - Feature Pipeline: 03-feature-pipeline.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - footnotes
+  - attr_list
+  - md_in_html
