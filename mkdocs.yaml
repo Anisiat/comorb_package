@@ -36,6 +36,7 @@ nav:
   - Getting Started: 00-getting-started.md
   - CCI Mapping Methodology: 01-CCI-mapping-methodology.md
   - iCARE Source Tables: 02-icare-source-tables-extraction.md
+  - Module Information: 03-module-information.md
   - Feature Pipeline: 04-feature-pipeline.md
 
 plugins:
