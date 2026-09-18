@@ -17,6 +17,25 @@ def clean_problems(problems_df: pd.DataFrame) -> pd.DataFrame:
     ``problem_code`` is treated as a SNOMED CT concept identifier and kept as
     text so it can be matched exactly to the long-format SNOMED mapping's
     ``snomed_code`` column without risking numeric precision loss.
+
+    Parameters
+    ----------
+    problems_df : pd.DataFrame
+        Raw table containing ``subject``, ``problem_code``, and
+        ``problem_dt_tm``. ``problem_desc`` is optional.
+
+    Returns
+    -------
+    pd.DataFrame
+        Copy with normalised column names, stripped string identifiers and
+        codes, and parsed dates. Invalid dates become ``NaT``. Rows without
+        both a code and a description are removed, as are duplicate rows.
+
+    Raises
+    ------
+    ValueError
+        If required columns are missing, normalised column names are
+        duplicated, or subject identifiers are missing.
     """
 
     # Normalise column names on a copy.

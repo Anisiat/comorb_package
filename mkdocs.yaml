@@ -30,9 +30,23 @@ nav:
   - iCARE Source Tables: 02-icare-source-tables-extraction.md
   - Module Information: 03-module-information.md
   - Feature Pipeline: 04-feature-pipeline.md
+  - API Reference:
+      - Overview: api/index.md
+      - Cleaning: api/cleaning.md
+      - Mapping: api/mapping.md
+      - Features: api/features.md
 
 plugins:
   - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+            show_signature_annotations: false
 
 markdown_extensions:
   - admonition

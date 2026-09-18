@@ -18,6 +18,26 @@ def clean_prescriptions(prescriptions_df: pd.DataFrame) -> pd.DataFrame:
     Medication records remain supporting evidence and are not converted into
     Charlson conditions here. Temporal filtering and medicine-to-condition
     mapping belong in the downstream feature-building step.
+
+    Parameters
+    ----------
+    prescriptions_df : pd.DataFrame
+        Raw table containing ``subject``, ``medication_name_short``, and
+        ``order_dt_tm``.
+
+    Returns
+    -------
+    pd.DataFrame
+        Copy with normalised column names, stripped subject identifiers,
+        lowercase medication names, and parsed order dates. Invalid dates
+        become ``NaT``. Rows without a medication name and duplicate rows
+        are removed.
+
+    Raises
+    ------
+    ValueError
+        If required columns are missing, normalised column names are
+        duplicated, or subject identifiers are missing.
     """
 
     # Normalise column names on a copy.

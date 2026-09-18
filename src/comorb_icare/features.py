@@ -76,13 +76,29 @@ def build_comorbidity_features(
         for example ``admission_date``.
     spell_col : str, default="spell_id"
         Column identifying each spell.
-    cci_score :  bool, default = 'False'
+    cci_score : bool, default=False
         Include CCI score in output table.
 
     Returns
     -------
     pd.DataFrame
-        One row per subject and spell with 17 CCI binary comorbidity columns.
+        One row per subject and spell with 17 CCI binary comorbidity columns
+        and, when requested, an additional ``cci_score`` column.
+
+    Raises
+    ------
+    ValueError
+        If required columns are missing, no evidence tables are supplied,
+        cutoff dates are missing or invalid, or matched evidence contains
+        unrecognised comorbidity labels.
+
+    Notes
+    -----
+    Evidence dates must be strictly earlier than the cutoff. Records missing
+    a subject, comorbidity, or usable evidence date do not contribute flags.
+    Scoring excludes the less severe diabetes, liver disease, or malignancy
+    category when its more severe counterpart is present, while preserving
+    the original binary flags. No age adjustment is applied.
     """
 
     required_cohort_columns = {
