@@ -7,9 +7,9 @@ on:
     paths:
       - 'docs/**'
       - 'src/**'
-      - 'mkdocs.yml'
+      - 'mkdocs.yaml'
       - 'pyproject.toml'
-      - '.github/workflows/docs.yml'
+      - '.github/workflows/docs.yaml'
 
 permissions:
   contents: read
@@ -39,7 +39,7 @@ jobs:
           pip install zensical mkdocstrings-python
 
       - name: Build documentation
-        run: zensical build --clean
+        run: zensical build --clean --config-file mkdocs.yaml
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
