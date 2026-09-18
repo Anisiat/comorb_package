@@ -1,18 +1,24 @@
-/* 1. Make the main paragraph explanations inside docstrings smaller */
-.doc-md-description p {
+/* Light-theme colours: edit these values to change the page appearance. */
+[data-md-color-scheme="default"] {
+    --md-default-bg-color: #faf9f6;
+    --md-default-fg-color: #4b4b4b;
+    --md-default-fg-color--light: #616161;
+    --md-typeset-color: #4b4b4b;
+}
+
+/* Make ordinary Markdown paragraphs smaller and slightly muted. */
+.md-typeset p {
     font-size: 0.85em;
-    color: #555;      /* Slightly dims the text so it looks cleaner */
+    color: var(--md-default-fg-color--light);
     line-height: 1.5;
 }
 
-/* 2. Completely hide the repetitive Parameters and Returns sections */
-.doc-section-parameters,
-.doc-section-returns,
-.doc-section-raises {
-    display: none !important;
-}
-
-/* 3. (Optional) Make the function signatures themselves a bit smaller */
-.doc-heading code {
+/* Make inline code in Markdown headings a bit smaller. */
+.md-typeset h1 code,
+.md-typeset h2 code,
+.md-typeset h3 code,
+.md-typeset h4 code,
+.md-typeset h5 code,
+.md-typeset h6 code {
     font-size: 0.85em;
 }
