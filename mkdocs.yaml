@@ -6,25 +6,11 @@ dev_addr: '0.0.0.0:8000'
 
 theme:
   name: material
-
-  font:
-    text: Inter
-    code: Fira Code
-
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
+    - scheme: default
       primary: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
+    - scheme: slate
       primary: indigo
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
 
   features:
     - content.code.copy
@@ -56,3 +42,6 @@ markdown_extensions:
   - footnotes
   - attr_list
   - md_in_html
+
+extra_css:
+  - stylesheets/api-custom.css
